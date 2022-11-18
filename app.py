@@ -5,10 +5,10 @@ from flask import Flask, request
 
 
 CREATE_BOOKMARKS_TABLE = (
-    "CREATE TABLE IF NOT EXISTS bookmarks ( id SERIAL PRIMARY KEY, name TEXT, url VARCHAR, folder_id INTEGER NULL, created_at TIMESTAMP, updated_at TIMESTAMP, FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE CASCADE);"
+    "CREATE TABLE IF NOT EXISTS bookmarks ( id SERIAL PRIMARY KEY, name TEXT, url VARCHAR, folder_id INTEGER NULL, created_at timestamp without time zone default (now() at time zone 'utc'), updated_at timestamp without time zone default (now() at time zone 'utc'), FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE CASCADE);"
 )
 
-CREATE_FOLDERS_TABLE = """"CREATE TABLE IF NOT EXISTS folders (id SERIAL PRIMARY KEY, name TEXT, description TEXT, created_at TIMESTAMP, updated_at TIMESTAMP);"""
+CREATE_FOLDERS_TABLE = """CREATE TABLE IF NOT EXISTS folders (id SERIAL PRIMARY KEY, name TEXT, description TEXT, created_at timestamp without time zone default (now() at time zone 'utc'), updated_at timestamp without time zone default (now() at time zone 'utc'));"""
 
 INSERT_BOOKMARK_RETURN_ID = "INSERT INTO bookmarks (name, url) VALUES (%s, %s) RETURNING id;"
 
@@ -34,6 +34,7 @@ def create_bookmark():
     url = data["url"]
     with connection:
         with connection.cursor() as cursor:
+            cursor.execute(CREATE_FOLDERS_TABLE)
             cursor.execute(CREATE_BOOKMARKS_TABLE)
             cursor.execute(INSERT_BOOKMARK_RETURN_ID, (name, url))
             bookmark_id = cursor.fetchone()[0]
