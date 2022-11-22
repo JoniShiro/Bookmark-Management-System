@@ -31,6 +31,9 @@ INSERT_FOLDER_RETURN_ID = (
 GET_ALL_BOOKMARKS_LIST = (""" SELECT * FROM bookmarks;""")
 GET_ALL_FOLDERS_LIST = (""" SELECT * FROM folders; """)
 
+GET_A_LIST_BOOKMARKS_FOR_A_FOLDER = (
+    """ SELECT * FROM bookmarks where folder_id = %s""")
+
 UPDATE_BOOKMARKS = ("""UPDATE bookmarks
                     SET name = %s,
                         url = %s,
@@ -103,6 +106,16 @@ def get_all_folders():
             folders_list = cursor.fetchall()
 
     return {"folder_list": folders_list}, 200
+
+
+@app.route("/api/v1/bookmarks/folders/<int:folder_id>", methods=['GET'])
+def get_bookmarks_for_a_folder(folder_id):
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute(GET_A_LIST_BOOKMARKS_FOR_A_FOLDER, (folder_id,))
+            bookmarks_list_for_folder = cursor.fetchall()
+
+    return {"bookmarks_list_for_folder": bookmarks_list_for_folder}, 200
 
 
 @app.route("/api/v1/folders/<int:folders_id>", methods=['PUT'])
